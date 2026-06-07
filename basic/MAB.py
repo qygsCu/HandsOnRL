@@ -99,13 +99,23 @@ class UCB(Solver):
         self.estimates[idx] += 1. * (r - self.estimates[idx]) / (self.counts[idx] + 1)
         return idx
     
-
+class ThompsonSampling(Solver):
+    def __init__(self, bandit):
+        super(ThompsonSampling, self).__init__(bandit)
+        self._a = np.ones(self.bandit.K)
+        self._b = np.ones(self.bandit.K)
     
+    def run_one_step(self):
+        samples = np.random.beta(self._a, self._b)
+        k = np.argmax(samples)
+        r = self.bandit.step(k)
+        if (r == 1): self._a[k] += 1
+        else: self._b[k] += 1
+        return k
+    
+
 np.random.seed(1)
-coef = 1  # 控制不确定性比重的系数
-UCB_solver = UCB(bandit_10_arm, coef)
-UCB_solver.run(5000)
-print('上置信界算法的累积懊悔为：', UCB_solver.regret)
-plot_results([UCB_solver], ["UCB"])
-
-
+thompson_sampling_solver = ThompsonSampling(bandit_10_arm)
+thompson_sampling_solver.run(5000)
+print('汤普森采样算法的累积懊悔为：', thompson_sampling_solver.regret)
+plot_results([thompson_sampling_solver], ["ThompsonSampling"])
