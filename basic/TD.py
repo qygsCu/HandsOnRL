@@ -120,6 +120,36 @@ class nstep_Sarsa:
             self.reward_list = []
             self.state_list = []
 
+class QLearning:
+    def __init__(self, nrow, ncol, gamma, alpha, n_actions=4):
+        self.nrow = nrow
+        self.ncol = ncol
+        self.gamma = gamma
+        self.alpha = alpha
+        self.n_action = self.n_action
+        self.Q_table = np.zeros([ncol * nrow, n_actions])
+
+    def take_action(self, state):
+        if np.random.random() < self.epsilon:
+            action = np.random.randint(self.n_action)
+        else:
+            action = np.argmax(self.Q_table[state])
+        return action
+
+    def best_action(self, state):  # 用于打印策略
+        Q_max = np.max(self.Q_table[state])
+        a = [0 for _ in range(self.n_action)]
+        for i in range(self.n_action):
+            if self.Q_table[state, i] == Q_max:
+                a[i] = 1
+        return a
+    
+    def update(self, s0, a0, r, s1, done):
+        td_target = r if done else r + self.gamma * max(self.Q_table[s1])
+        td_error = td_target - self.Q_table[s0][a0]
+        self.Q_table[s0][a0] += self.alpha * td_error
+
+
 
 np.random.seed(0)
 n_step = 5  # 5步Sarsa算法
